@@ -1,6 +1,6 @@
 FROM php:8.1-apache
 
-# Update and install ONLY the most essential packages
+# Install System Dependencies
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -9,26 +9,31 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure and install PHP extensions
+# Install Extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd bcmath mysqli pdo_mysql
 
-# Enable Apache rewrite
+# --- THE FIX ---
 RUN a2enmod rewrite
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN echo '<VirtualHost *:80>\n\
+    DocumentRoot /var/www/html/public\n\
+    <Directory /var/www/html/public>\n\
+        Options Indexes FollowSymLinks\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+# ----------------
 
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy files
 COPY . .
 
-# Copy Composer
+# Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install dependencies
-# We skip scripts to avoid the 'artisan' error, and ignore platform reqs for safety
+# Install Dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
 
 # Set permissions
