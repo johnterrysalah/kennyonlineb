@@ -1,16 +1,19 @@
-# Use PHP 8.1
 FROM php:8.1-apache
 
-# Install System Dependencies
+# Update and install ONLY the most essential packages
 RUN apt-get update && apt-get install -y \
-    git unzip libpng-dev libjpeg-dev libfreetype6-dev libbcmath-dev \
+    git \
+    unzip \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Extensions
+# Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd bcmath mysqli pdo_mysql
 
-# Apache Config (Points web root to /public)
+# Enable Apache rewrite
 RUN a2enmod rewrite
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
@@ -18,17 +21,17 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
 WORKDIR /var/www/html
 
-# Copy files
+# Copy project files
 COPY . .
 
-# Install Composer
+# Copy Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install Dependencies and run artisan
-# We run migrate here. Note: This assumes your DB env variables are 
-# set in the Render Dashboard "Environment" tab.
-RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs && \
-    php artisan package:discover --ansi && \
-    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Install dependencies
+# We skip scripts to avoid the 'artisan' error, and ignore platform reqs for safety
+RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
