@@ -13,11 +13,13 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd bcmath mysqli pdo_mysql
 
-# --- THE FIX: Explicit Apache Configuration to stop redirect loops ---
+# --- THE FIX: Updated Apache Configuration ---
 RUN a2enmod rewrite
 RUN echo '<VirtualHost *:80>\n\
     DocumentRoot /var/www/html/public\n\
     DirectoryIndex index.php\n\
+    # Fix for Render SSL termination to stop redirect loops\n\
+    SetEnvIf X-Forwarded-Proto "https" HTTPS=on\n\
     <Directory /var/www/html/public>\n\
         Options FollowSymLinks\n\
         AllowOverride All\n\
@@ -30,9 +32,6 @@ RUN echo '<VirtualHost *:80>\n\
     </Directory>\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-# Set environment variable for trusted proxies (Fixes HTTPS redirect loops)
-ENV TRUSTED_PROXIES="*"
-
 WORKDIR /var/www/html
 
 # Copy project files
@@ -43,6 +42,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install Dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
+
+# Clear Laravel caches to ensure configuration is fresh
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
