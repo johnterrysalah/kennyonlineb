@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment files
+.env
+.env.backup
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# Laravel / PHP storage
+/public/hot
+/public/storage
+/storage/*.key
+
+# Build / cache
+dist/
+build/
+.phpunit.result.cache
+
+# Database / backups
+*.sql
+
+# Archives
+*.zip
+
+# Keys / secrets
+*.key
+
+# Docker
+docker-compose.override.yml
+
+# Laravel / Homestead
+Homestead.json
+Homestead.yaml
+
+# IDE files
+.idea/
+.vscode/
+.DS_Store
