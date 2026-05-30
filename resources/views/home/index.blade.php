@@ -299,7 +299,7 @@
                 How Can We Help You Today?
             </h2>
             <p class="text-xl text-primary-100 max-w-2xl mx-auto">
-                Comprehensive banking solutions tailored to your needs
+                Comprehensive digital banking solutions tailored to your needs
             </p>
         </div>
 

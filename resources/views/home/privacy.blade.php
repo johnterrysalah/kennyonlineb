@@ -104,12 +104,12 @@
 
                 <h2>10. Contact Us</h2>
                 <p>If you have any questions about this Privacy Policy or our privacy practices, please contact us:</p>
-                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mt-4">
+                <!-- <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mt-4">
                     <p class="mb-2"><strong>Privacy Officer</strong></p>
                     <p class="mb-2"><strong>Email:</strong> {{ $settings->contact_email }}</p>
                     <p class="mb-2"><strong>Phone:</strong> 1-800-BANKING</p>
                     <p><strong>Address:</strong> 123 Banking Street, Financial District, New York, NY 10001</p>
-                </div>
+                </div> -->
 
                 <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                     <p class="text-sm text-gray-600 dark:text-gray-400">
