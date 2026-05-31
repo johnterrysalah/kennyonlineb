@@ -57,3 +57,8 @@ Route::get('/clear-cache', function() {
     \Artisan::call('cache:clear');
     return "Cache cleared successfully!";
 });
+
+Route::get('/run-migrations-now', function() {
+    \Artisan::call('migrate --force');
+    return "Migrations have been run!";
+});
